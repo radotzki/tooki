@@ -1,0 +1,10 @@
+<div md-dialog-content class="create-doc-form">
+    <form>
+        <md-input-container class="doc-name">
+            <input md-input placeholder="Doc name" type="text" #name>
+        </md-input-container>
+        <div class="create-doc-action">
+            <button md-raised-button [color]="'primary'" (click)="createDoc(name.value)">Create</button>
+        </div>
+    </form>
+</div>

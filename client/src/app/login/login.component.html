@@ -1,0 +1,11 @@
+<section class="login">
+    <img width="300px" src="/assets/toucan.png">
+    <form class="login-form">
+        <p *ngIf="!mailSent"> Enter your email to login or create an account </p>
+        <p *ngIf="mailSent"> An email has been sent to your email account </p>
+        <md-input-container>
+            <input md-input placeholder="Email" type="email" #email [disabled]="mailSent">
+        </md-input-container>
+        <button md-raised-button [color]="'primary'" (click)="login(email.value)" [disabled]="!email.value || mailSent">Login</button>
+    </form>
+</section>

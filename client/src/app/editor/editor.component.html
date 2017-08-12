@@ -1,0 +1,29 @@
+<md-toolbar class="tooki-toolbar">
+    <div class="doc-toolbar">
+        <div class="doc-name">
+            <img width="100px" src="/assets/toucan.png">
+            <span> {{ doc?.name }} </span>
+        </div>
+        <div class="users">
+            <span
+                *ngFor="let user of docUsers"
+                class="user-circle"
+                [attr.first-letter]="user.email[0]"
+                [class.active-user]="user.active"
+                [mdTooltip]="user.email">
+            </span>
+
+            <button
+                class="share-button"
+                md-button
+                (click)="openShareDialog()"
+                mdTooltip="Share"
+            >
+                <md-icon>share</md-icon>
+            </button>
+        </div>
+    </div>
+</md-toolbar>
+
+
+<div id="editor" class="editor"></div>

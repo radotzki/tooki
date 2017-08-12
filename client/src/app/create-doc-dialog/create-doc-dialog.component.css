@@ -1,0 +1,14 @@
+.create-doc-form {
+    min-width: 360px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.doc-name {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.create-doc-action {
+    text-align: end;
+}

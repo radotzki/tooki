@@ -1,0 +1,10 @@
+<div md-dialog-content class="share-form">
+    <form>
+        <md-input-container class="recipient">
+            <input md-input placeholder="Email" type="email" #email>
+        </md-input-container>
+        <div class="share-action">
+            <button md-raised-button [color]="'primary'" (click)="share(email.value)">share</button>
+        </div>
+    </form>
+</div>

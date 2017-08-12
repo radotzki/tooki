@@ -1,0 +1,58 @@
+.editor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 826px;
+    height: calc(100vh - 42px - 64px - 2px);
+    background: #fff;
+}
+
+.doc-toolbar {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.users {
+    display: flex;
+    align-items: center;
+}
+
+.user-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #BDBDBD;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    text-align: center;
+    background-color: #BDBDBD;
+    transition: all 0.5s cubic-bezier(0.6, -0.28, 0.74, 0.05);
+}
+
+.user-circle.active-user {
+    background-color: #ffd740;
+    border-color: #ffd740;
+}
+
+.user-circle:after {
+    content: ""attr(first-letter)"";
+    text-transform: capitalize;
+    font-weight: 200;
+}
+
+.doc-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.share-button {
+    min-width: 30px;
+    padding: 0;
+}

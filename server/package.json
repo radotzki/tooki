@@ -1,0 +1,44 @@
+{
+  "name": "tooki",
+  "version": "1.0.0",
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon server.js",
+    "debug": "nodemon --debug server.js",
+    "logs": "heroku logs --app tooki-server --tail",
+    "deploy": "git push heroku master"
+  },
+  "dependencies": {
+    "bcrypt": "1.0.2",
+    "body-parser": "1.15.2",
+    "co": "4.6.0",
+    "cookie-parser": "1.4.3",
+    "cookie-session": "1.2.0",
+    "cors": "2.8.1",
+    "cross-env": "3.1.4",
+    "express": "4.14.0",
+    "express-jwt": "5.1.0",
+    "express-session": "1.14.2",
+    "forever": "0.15.3",
+    "jsonwebtoken": "7.2.1",
+    "mailgun-js": "0.8.1",
+    "method-override": "2.3.7",
+    "mongoose": "4.7.6",
+    "morgan": "1.7.0",
+    "only": "0.0.2",
+    "passwordless": "1.1.2",
+    "passwordless-mongostore": "0.1.4",
+    "socket.io": "1.7.2",
+    "winston": "2.3.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "7.1.1",
+    "eslint": "3.13.0",
+    "nodemon": "1.11.0"
+  },
+  "engines": {
+    "node": "6.9.2",
+    "npm": "3.10.8"
+  }
+}

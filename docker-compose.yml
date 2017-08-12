@@ -1,0 +1,22 @@
+version: "2"
+services:
+    db:
+        image: mongo
+        ports:
+          - "27017:27017"
+    server:
+        build: ./server
+        links:
+          - db
+        environment:
+          - NODE_ENV=production
+          - MONGODB_URI=mongodb://db:27017/tooki
+          - SECRET=sNro2UJd3ZfXgKDFG5UHcdfNqSys9sd1
+          - MAILGUN_API_KEY=key-7fc08b71e401ae3f91f9e5bda4513ba2
+          - MAILGUN_DOMAIN=mail.tooki.pw
+        ports:
+          - "4300:4300"
+    client:
+        build: ./client
+        ports:
+          - "4200:4200"

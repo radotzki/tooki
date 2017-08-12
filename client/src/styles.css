@@ -1,0 +1,18 @@
+@import '~quill/dist/quill.snow.css';
+
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #eee;
+}
+
+md-toolbar.tooki-toolbar {
+    background: linear-gradient(135deg,#008fe2 0,#00b29c 100%);
+    color: #ffffff;
+}
+
+.ql-toolbar.ql-snow {
+    margin-left: auto;
+    margin-right: auto;
+    width: 826px;
+}

@@ -1,0 +1,31 @@
+<md-toolbar class="tooki-toolbar">
+    <div fxFlex fxLayoutAlign="space-between center">
+        <img width="100px" src="/assets/toucan.png">
+        <span>Tooki</span>
+        <span fxFlex fxLayoutAlign="end center">
+            <md-icon>account_circle</md-icon>
+            <span class="user-email"> {{email}} </span>
+            <button md-icon-button [md-menu-trigger-for]="menu">
+                <md-icon>arrow_drop_down</md-icon>
+            </button>
+        </span>
+    </div>
+</md-toolbar>
+<md-menu #menu x-position="before">
+    <button md-menu-item (click)="signout()">Signout</button>
+</md-menu>
+
+<div class="docs-container">
+    <div *ngFor="let doc of docs" class="doc-cube" (click)="open(doc)">
+        <md-icon class="doc-cube-icon"> insert_drive_file </md-icon>
+        <span class="doc-cube-name"> {{doc.name}} </span>
+    </div>
+</div>
+
+<div *ngIf="docs && !docs.length" class="no-docs">
+    <h2> You still have no docs </h2>
+    <h4> Create your first or ask a friend to share a doc with you! </h4>
+    <md-icon class="no-doc-icon">layers</md-icon>
+</div>
+
+<button class="add-doc-button" md-fab (click)="openCreateDocDialog()"><md-icon>add</md-icon></button>

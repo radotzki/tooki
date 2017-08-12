@@ -1,0 +1,64 @@
+.docs-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.doc-cube {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 10px 30px;
+}
+
+.doc-cube:hover .doc-cube-icon {
+    cursor: pointer;
+    transform: rotate(5deg);
+}
+
+.doc-cube:hover .doc-cube-name {
+    cursor: pointer;
+    color: #2798ff;
+}
+
+.doc-cube-icon {
+    font-size: 80px;
+    height: 80px;
+    width: 80px;
+    color: #2798ff;
+    transition: transform 0.2s ease-in-out;
+}
+
+.doc-cube-name {
+    font-size: larger;
+    transition: color 0.15s ease-in-out;
+}
+
+.user-email {
+    margin-left: 5px;
+}
+
+.add-doc-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.no-docs {
+    position: absolute;
+    top: 200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-doc-icon {
+    font-size: 280px;
+    width: 280px;
+    height: 280px;
+    color: #757575;
+}
