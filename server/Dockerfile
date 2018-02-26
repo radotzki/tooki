@@ -1,5 +1,17 @@
-FROM node:6.9-onbuild
+FROM node:9.6
 
-RUN apt-get update && apt-get install bcrypt && apt-get autoremove -y
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+
+RUN npm install
+
+# Bundle app source
+COPY . .
 
 EXPOSE 4300
+CMD [ "npm", "start" ]

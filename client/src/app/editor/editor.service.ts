@@ -14,7 +14,6 @@ import * as tk from '../interfaces';
 @Injectable()
 export class EditorService {
     private _socket: SocketIOClient.Socket;
-    private oldMessages: string[] = [];
 
     constructor(
         private http: HttpService,
@@ -42,11 +41,9 @@ export class EditorService {
     queue(docId: string): Observable<tk.message> {
         return Observable
             .fromEvent(this.getSocket(docId), 'broadcast')
-            .filter((item: { message: string, id: string }) => this.oldMessages.indexOf(item.id) === -1)
-            .do((item: { message: string, id: string }) => this.ackMessage(docId, item.id))
-            .do((item: { message: string, id: string }) => this.oldMessages.push(item.id))
-            .concatMap((item: { message: string, id: string }) =>
-                this.signalService.decrypt(JSON.parse(item.message)).then(plain => JSON.parse(plain) as tk.message))
+            .do((item: { message: string }) => this.ackMessage(docId))
+            .concatMap((item: { message: string }) =>
+                this.signalService.decrypt(item.message).then(plain => JSON.parse(plain) as tk.message))
             .do((message: tk.message) => this.sendMessageToJournal(docId, message));
     }
 
@@ -107,8 +104,8 @@ export class EditorService {
         });
     }
 
-    private ackMessage(docId: string, messageId: string) {
-        this.getSocket(docId).emit('message-ack', messageId);
+    private ackMessage(docId: string) {
+        this.getSocket(docId).emit('message-ack');
     }
 
     private createHashFromOp(): string {

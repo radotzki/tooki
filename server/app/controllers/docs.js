@@ -1,5 +1,6 @@
 'use strict';
 
+const redis = require('../../config/redis');
 const mongoose = require('mongoose');
 const { wrap: async } = require('co');
 const winston = require('winston');
@@ -38,23 +39,17 @@ exports.messageToQueue = async(function* (socket, recipient, message) {
 
     winston.log('info', `message to queue`, { sender: user.id, message, docId, recipient });
 
-    try {
-        const doc = yield Doc.load(docId);
-        const recipientUser = doc.users.find(u => u.email === recipient);
+    const doc = yield Doc.load(docId);
+    const recipientUser = doc.users.find(u => u.email === recipient);
 
-        if (!recipientUser) {
-            throw 'recipient is not part of this document';
-        }
-
-        yield Doc.findOneAndUpdate(
-            { _id: docId },
-            { $push: { queue: { userId: recipientUser.id, message } } }
-        );
-
-        sendMessage(recipientUser.id, doc.id);
-    } catch (err) {
-        console.error(err);
+    if (!recipientUser) {
+        throw 'recipient is not part of this document';
     }
+
+    redis.rpush(`queue:${docId}:${recipientUser.id}`, message)
+        .then(() => sendMessage(recipientUser.id, docId))
+        .catch(console.error);
+
 });
 
 exports.messageToJournal = async(function* (socket, message) {
@@ -63,86 +58,67 @@ exports.messageToJournal = async(function* (socket, message) {
 
     winston.log('info', `message to journal`, { userId, message });
 
-    try {
-        yield Doc.findOneAndUpdate(
-            { _id: docId },
-            { $push: { journal: { userId, message } } }
-        );
-
-        sendMessage(userId, docId);
-    } catch (err) {
-        console.error(err);
-    }
+    redis.rpush(`journal:${docId}:${userId}`, message)
+        .then(() => sendMessage(userId, docId))
+        .catch(console.error);
 });
 
-exports.messageAck = async(function* (socket, messageId) {
+exports.messageAck = async(function* (socket) {
     const docId = socket.request.query.docId;
     const userId = socket.request.user.id;
 
-    winston.log('info', `ack message`, { userId, messageId });
+    winston.log('info', `ack message`, { userId });
 
-    try {
-        yield Doc.findOneAndUpdate(
-            { _id: docId },
-            { $pull: { queue: { _id: messageId } } }
-        );
-
-        sendMessage(userId, docId, true);
-    } catch (err) {
-        console.error(err);
-    }
+    redis.lpop(`queue:${docId}:${userId}`)
+        .then(() => sendMessage(userId, docId, true))
+        .catch(console.error);
 });
 
-exports.shrinkJournal = async(function* (req, res) {
+exports.shrinkJournal = function (req, res) {
     const doc = req.doc;
     const user = req.user;
-    const {message} = req.body;
+    const { message } = req.body;
 
     winston.log('info', `shrink journal to user ${user.email} in doc ${doc.id}`, { message });
 
-    try {
-        yield Doc.findOneAndUpdate(
-            { _id: doc.id },
-            { $pull: { journal: { userId: user.id } } }
-        );
-
-        yield Doc.findOneAndUpdate(
-            { _id: doc.id },
-            { $push: { journal: { userId: user.id, message } } }
-        );
-
-        res.json({});
-    } catch (err) {
-        res.status(400).json({ message: err.toString() });
-        return;
-    }
-});
+    redis.multi()
+        .del(`journal:${doc.id}:${user.id}`)
+        .rpush(`journal:${doc.id}:${user.id}`, message)
+        .exec((err) => {
+            if (err) {
+                console.log('err', err);
+                res.status(400).json({ message: err.toString() });
+            } else {
+                res.json({});
+            }
+        });
+}
 
 
 exports.invite = async(function* (req, res) {
     const doc = req.doc;
-    const {recipient, message} = req.body;
+    const { recipient, message } = req.body;
     let recipientUser;
 
     winston.log('info', `invite user ${recipient} to doc ${doc.id}`, { recipient, message });
 
-    try {
-        recipientUser = yield User.load({ criteria: { email: recipient } });
+    recipientUser = yield User.load({ criteria: { email: recipient } });
 
-        if (!recipientUser) {
-            res.status(400).json({ message: `${recipient} is not a registered user` });
-            return;
-        }
-
-        doc.users.push(recipientUser._id);
-        doc.queue.push({ userId: recipientUser.id, message })
-        yield doc.save();
-        res.json({ doc });
-    } catch (err) {
-        res.status(400).json({ message: err.toString() });
+    if (!recipientUser) {
+        res.status(400).json({ message: `${recipient} is not a registered user` });
         return;
     }
-});
+
+    doc.users.push(recipientUser._id);
+
+    redis.rpush(`queue:${doc.id}:${recipientUser.id}`, message)
+        .then(() => doc.save())
+        .then(() => res.json({ doc }))
+        .catch((err) => {
+            res.status(400).json({ message: err.toString() });
+            return;
+        });
+})
 
 exports.load = async(function* (req, res, next, id) {
     try {
@@ -155,21 +131,19 @@ exports.load = async(function* (req, res, next, id) {
 });
 
 exports.show = async(function* (req, res) {
-    try {
-        const doc = yield Doc.load(req.doc.id);
-        const users = doc.users.map(user => user.email);
-        const journal = doc.journal
-            .filter(item => item.userId === req.user.id)
-            .map(item => item.message);
-        res.json({
-            id: doc._id,
-            name: doc.name,
-            users,
-            journal,
+    const doc = yield Doc.load(req.doc.id);
+    const users = doc.users.map(user => user.email);
+    redis.lrange(`journal:${req.doc.id}:${req.user.id}`, 0, -1)
+        .then(journal => {
+            res.json({
+                id: req.doc.id,
+                users,
+                journal,
+            });
+        })
+        .catch(err => {
+            res.status(400).json({ errors: err.toString() });
         });
-    } catch (err) {
-        res.status(400).json({ errors: err.toString() });
-    }
 });
 
 exports.index = async(function* (req, res) {
@@ -203,8 +177,6 @@ exports.create = async(function* (req, res) {
     let doc = new Doc({
         name: req.body.name,
         users: [req.user.id],
-        journal: [],
-        queue: [],
     });
     try {
         yield doc.save();
@@ -222,22 +194,23 @@ exports.destroy = async(function* (req, res) {
     res.json({});
 });
 
-const sendMessage = async(function* (userId, docId, force) {
-    try {
-        const doc = yield Doc.load(docId);
-        const userQueue = doc.queue.filter(item => item.userId === userId);
-        if ((force && userQueue.length > 0) || userQueue.length === 1) {
-            const {message, id} = userQueue[0];
-            const userSocket = socketMap[userId][docId];
-            if (userSocket) {
-                winston.log('info', `broadcast message`, { userId, messageId: id, message });
-                userSocket.emit('broadcast', { message, id });
-            }
-        }
-    } catch (err) {
-        console.error(err);
+const sendMessage = async function (userId, docId, force) {
+    const len = await redis.llen(`queue:${docId}:${userId}`);
+
+    if ((force && len > 0) || len === 1) {
+        redis.lrange(`queue:${docId}:${userId}`, 0, 0)
+            .then(userQueue => {
+                const message = JSON.parse(userQueue[0]);
+                const userSocket = socketMap[userId][docId];
+                if (userSocket) {
+                    winston.log('info', `broadcast message`, { userId, message });
+                    userSocket.emit('broadcast', { message });
+                }
+            })
+            .catch(console.error);
     }
-});
+
+};
 
 function addSocketToMap(user, docId, socket) {
     if (!socketMap[user.id]) {

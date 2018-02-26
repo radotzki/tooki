@@ -21,6 +21,7 @@
     "express-jwt": "5.1.0",
     "express-session": "1.14.2",
     "forever": "0.15.3",
+    "ioredis": "^3.2.2",
     "jsonwebtoken": "7.2.1",
     "mailgun-js": "0.8.1",
     "method-override": "2.3.7",
@@ -36,9 +37,5 @@
     "babel-eslint": "7.1.1",
     "eslint": "3.13.0",
     "nodemon": "1.11.0"
-  },
-  "engines": {
-    "node": "6.9.2",
-    "npm": "3.10.8"
   }
 }

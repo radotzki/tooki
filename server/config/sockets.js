@@ -22,7 +22,7 @@ module.exports = function (io) {
         docs.onUserConnect(socket);
         socket.on('message-to-queue', ({recipient, message}) => docs.messageToQueue(socket, recipient, message));
         socket.on('message-to-journal', (message) => docs.messageToJournal(socket, message));
-        socket.on('message-ack', (messageId) => docs.messageAck(socket, messageId));
+        socket.on('message-ack', () => docs.messageAck(socket));
         socket.on('disconnect', () => docs.onUserDisconnect(socket));
     });
 }

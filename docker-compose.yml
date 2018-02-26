@@ -4,19 +4,32 @@ services:
         image: mongo
         ports:
           - "27017:27017"
+    redis:
+        image: redis:4
+        ports:
+          - "6379:6379"
     server:
         build: ./server
         links:
           - db
+          - redis
         environment:
-          - NODE_ENV=production
+          - NODE_ENV=development
           - MONGODB_URI=mongodb://db:27017/tooki
+          - REDIS_HOST=redis
+          - REDIS_PORT=6379
           - SECRET=sNro2UJd3ZfXgKDFG5UHcdfNqSys9sd1
           - MAILGUN_API_KEY=key-7fc08b71e401ae3f91f9e5bda4513ba2
           - MAILGUN_DOMAIN=mail.tooki.pw
         ports:
           - "4300:4300"
+        volumes:
+          - ./server/app:/usr/src/app/app
+          - ./server/config:/usr/src/app/config
+          - ./server/server.js:/usr/src/app/server.js
     client:
         build: ./client
         ports:
           - "4200:4200"
+        volumes:
+          - ./client/src:/usr/src/app/src
