@@ -18,9 +18,9 @@ services:
           - MONGODB_URI=mongodb://db:27017/tooki
           - REDIS_HOST=redis
           - REDIS_PORT=6379
-          - SECRET=sNro2UJd3ZfXgKDFG5UHcdfNqSys9sd1
-          - MAILGUN_API_KEY=key-7fc08b71e401ae3f91f9e5bda4513ba2
-          - MAILGUN_DOMAIN=mail.tooki.pw
+          - SECRET=secret
+          - MAILGUN_API_KEY=mailgun_secret
+          - MAILGUN_DOMAIN=mailgun_domain
         ports:
           - "4300:4300"
         volumes:
